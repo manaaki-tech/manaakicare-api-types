@@ -1,0 +1,58 @@
+{
+  "name": "@manaakicare/api-types",
+  "version": "1.0.0",
+  "description": "TypeScript types and API client for ManaakiCare API",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "fetch-schema": "curl -o ./schemas/complete.json http://localhost:8000/api/schema/",
+    "generate": "npx @hey-api/openapi-ts -i ./schemas/complete.json -o ./src",
+    "build": "npm run fetch-schema && npm run generate && tsc",
+    "build:quick": "npm run generate && tsc",
+    "clean": "rm -rf dist src schemas/complete.json",
+    "clean:all": "rm -rf dist src schemas/*.json node_modules",
+    "test": "tsc --noEmit",
+    "dev": "npm run build",
+    "watch": "tsc --watch --preserveWatchOutput"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/manaakicare/manaakicare-api-types.git"
+  },
+  "keywords": [
+    "manaakicare",
+    "api",
+    "types",
+    "typescript",
+    "openapi",
+    "client"
+  ],
+  "author": "ManaakiCare Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "typescript": ">=5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@apidevtools/swagger-parser": "^12.1.0",
+    "@hey-api/client-fetch": "^0.13.1",
+    "@hey-api/openapi-ts": "^0.85.2",
+    "fs-extra": "^11.3.2",
+    "glob": "^11.0.3",
+    "tsx": "^4.20.6"
+  }
+}

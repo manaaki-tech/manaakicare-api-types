@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Generated files - these are created at build time
+src/generated/
+src/*.gen.ts
+src/client/
+src/core/
+src/types.gen.ts
+src/sdk.gen.ts
+src/client.gen.ts
+
+# Fetched schema files - generated from backend
+schemas/complete.json
+schemas/bundled.json
+schemas/*.json
+# Keep only: schemas/models/*.json if you want to track model schemas
+schema.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Package manager
+.pnpm-debug.log*

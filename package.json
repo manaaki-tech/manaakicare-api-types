@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "fetch-schema": "curl -o ./schemas/complete.json http://localhost:8000/api/schema/",
-    "generate": "npx @hey-api/openapi-ts -i ./schemas/complete.json -o ./src",
+    "generate": "npx @hey-api/openapi-ts",
     "build": "npm run fetch-schema && npm run generate && tsc",
     "build:quick": "npm run generate && tsc",
     "clean": "rm -rf dist src schemas/complete.json",

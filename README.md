@@ -2,6 +2,21 @@
 
 TypeScript types and API client auto-generated from the ManaakiCare backend OpenAPI schema.
 
+## 📖 Type Generation Workflow
+
+**See:** [../manaakicare-backend/docs/TYPE_GENERATION_WORKFLOW.md](../manaakicare-backend/docs/TYPE_GENERATION_WORKFLOW.md)
+
+**Normal workflow (from backend):**
+```bash
+cd ~/dev/manaakicare-backend
+./scripts/generate-schema.sh  # Does everything automatically!
+```
+
+**Manual regeneration (from this package):**
+```bash
+npm run build:quick  # Uses existing schema
+```
+
 ## 🏠 Local Development
 
 This package is designed for local development alongside the backend and frontend repositories.

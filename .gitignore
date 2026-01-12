@@ -14,9 +14,10 @@ src/sdk.gen.ts
 src/client.gen.ts
 
 # Fetched schema files - generated from backend
-schemas/complete.json
+# NOTE: schemas/complete.json is now committed for CI/CD builds
+# schemas/complete.json  # <- Committed for GitHub Actions
 schemas/bundled.json
-schemas/*.json
+# schemas/*.json  # <- Too broad, allow complete.json
 # Keep only: schemas/models/*.json if you want to track model schemas
 schema.json
 

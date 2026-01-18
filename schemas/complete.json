@@ -1395,6 +1395,13 @@ paths:
           type: string
           format: uuid
       - in: query
+        name: client
+        schema:
+          type: string
+          format: uuid
+        description: FamilyMember UUID - returns all documents for this client across
+          all scopes
+      - in: query
         name: content_type
         schema:
           type: integer
@@ -1440,6 +1447,12 @@ paths:
         required: false
         in: query
         description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
         schema:
           type: integer
       - in: query
@@ -7117,7 +7130,35 @@ paths:
       - in: path
         name: status
         schema:
+          enum:
+          - draft
+          - pending_consent
+          - pending_associated_contact
+          - pending_assessment
+          - pending_cultural_soco
+          - pending_review
+          - pending_service_dispatch
+          - pending_service_review
+          - accepted_pending_allocation
+          - allocated_awaiting_service
+          - service_in_progress
+          - closed
+          - completed
           type: string
+          description: |-
+            * `draft` - Draft
+            * `pending_consent` - Pending Consent
+            * `pending_associated_contact` - Pending Associated Contact
+            * `pending_assessment` - Pending Assessment
+            * `pending_cultural_soco` - Pending Cultural Soco
+            * `pending_review` - Pending Review
+            * `pending_service_dispatch` - Pending Service Dispatch
+            * `pending_service_review` - Pending Service Review
+            * `accepted_pending_allocation` - Accepted Pending Allocation
+            * `allocated_awaiting_service` - Allocated Awaiting Service
+            * `service_in_progress` - Service In Progress
+            * `closed` - Closed
+            * `completed` - Completed
         required: true
       tags:
       - v1
@@ -8086,7 +8127,8 @@ components:
           type: string
           readOnly: true
         status:
-          type: string
+          allOf:
+          - $ref: '#/components/schemas/StatusAcfEnum'
           readOnly: true
         statusDisplay:
           type: string
@@ -8177,8 +8219,7 @@ components:
           type: string
           maxLength: 50
         status:
-          type: string
-          maxLength: 255
+          $ref: '#/components/schemas/Status1eaEnum'
         statusDisplay:
           type: string
           readOnly: true
@@ -8313,9 +8354,8 @@ components:
           description: Start time of the activity
         durationInMinutes:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
           nullable: true
           description: Duration of the activity in minutes
         isFollowUpRequired:
@@ -8388,9 +8428,8 @@ components:
           description: Rich text template content
         totalConsumedTimeInMinutes:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
           nullable: true
           description: Total time consumed in minutes
         isCaseNotes:
@@ -8514,9 +8553,8 @@ components:
           description: Start time of the activity
         durationInMinutes:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
           nullable: true
           description: Duration of the activity in minutes
         isFollowUpRequired:
@@ -8601,9 +8639,8 @@ components:
           description: Rich text template content
         totalConsumedTimeInMinutes:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
           nullable: true
           description: Total time consumed in minutes
         isCaseNotes:
@@ -10067,9 +10104,8 @@ components:
           maxLength: 50
         sortOrder:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
           description: Order for displaying categories at the same level
         allowSubcategories:
           type: boolean
@@ -10157,9 +10193,8 @@ components:
           maxLength: 50
         sortOrder:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
           description: Order for displaying categories at the same level
         allowSubcategories:
           type: boolean
@@ -10219,7 +10254,7 @@ components:
       description: |-
         Lightweight serializer for Document list view.
         Optimized for performance in list endpoints.
-        Includes polymorphic entity information.
+        Includes polymorphic entity information and source entity metadata for grouping.
       properties:
         id:
           type: string
@@ -10300,6 +10335,25 @@ components:
           format: date
           nullable: true
           description: Expiration date for the document (e.g., for certifications)
+        sourceEntity:
+          type: object
+          properties:
+            type:
+              type: string
+              description: Entity type (referral, service_episode, service_user)
+            id:
+              type: string
+              format: uuid
+              nullable: true
+            display:
+              type: string
+              description: Human-readable identifier
+          readOnly: true
+        client:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
         createdAt:
           type: string
           format: date-time
@@ -10310,6 +10364,7 @@ components:
           readOnly: true
       required:
       - categoryName
+      - client
       - contentTypeName
       - createdAt
       - entityDisplay
@@ -10321,6 +10376,7 @@ components:
       - referenceNumber
       - scope
       - scopeDisplay
+      - sourceEntity
       - tags
       - title
       - updatedAt
@@ -10473,9 +10529,8 @@ components:
           readOnly: true
         versionNumber:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
           description: Version number of this document
         fileName:
           type: string
@@ -10647,9 +10702,8 @@ components:
           type: boolean
         sortOrder:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
         createdAt:
           type: string
           format: date-time
@@ -10690,9 +10744,8 @@ components:
           type: boolean
         sortOrder:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
         createdAt:
           type: string
           format: date-time
@@ -10768,9 +10821,8 @@ components:
           maxLength: 255
         sortOrder:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
         primaryContactName:
           type: string
           nullable: true
@@ -11491,8 +11543,7 @@ components:
           type: string
           maxLength: 50
         status:
-          type: string
-          maxLength: 255
+          $ref: '#/components/schemas/StatusAcfEnum'
         statusDisplay:
           type: string
           readOnly: true
@@ -11622,9 +11673,8 @@ components:
           type: boolean
         sortOrder:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
         createdAt:
           type: string
           format: date-time
@@ -12873,9 +12923,8 @@ components:
           description: Start time of the activity
         durationInMinutes:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
           nullable: true
           description: Duration of the activity in minutes
         isFollowUpRequired:
@@ -12948,9 +12997,8 @@ components:
           description: Rich text template content
         totalConsumedTimeInMinutes:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
           nullable: true
           description: Total time consumed in minutes
         isCaseNotes:
@@ -13604,9 +13652,8 @@ components:
           maxLength: 50
         sortOrder:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
           description: Order for displaying categories at the same level
         allowSubcategories:
           type: boolean
@@ -13738,9 +13785,8 @@ components:
           type: boolean
         sortOrder:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
         createdAt:
           type: string
           format: date-time
@@ -13774,9 +13820,8 @@ components:
           type: boolean
         sortOrder:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
         createdAt:
           type: string
           format: date-time
@@ -14106,9 +14151,8 @@ components:
           type: boolean
         sortOrder:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
         createdAt:
           type: string
           format: date-time
@@ -14557,8 +14601,7 @@ components:
         reasonForReferral:
           type: string
         status:
-          type: string
-          maxLength: 255
+          $ref: '#/components/schemas/StatusAcfEnum'
         isReferralAndClientCompleted:
           type: boolean
           description: Whether referral and client processes are completed
@@ -14627,7 +14670,8 @@ components:
           type: string
           readOnly: true
         status:
-          type: string
+          allOf:
+          - $ref: '#/components/schemas/Status1eaEnum'
           readOnly: true
         statusDisplay:
           type: string
@@ -14775,7 +14819,7 @@ components:
       properties:
         status:
           allOf:
-          - $ref: '#/components/schemas/ServiceEpisodeStatusUpdateStatusEnum'
+          - $ref: '#/components/schemas/StatusE21Enum'
           description: |-
             New status for the service episode
 
@@ -15048,8 +15092,7 @@ components:
           format: date
           description: Date when referral was made
         status:
-          type: string
-          maxLength: 255
+          $ref: '#/components/schemas/StatusAcfEnum'
         statusDisplay:
           type: string
           readOnly: true
@@ -15430,7 +15473,8 @@ components:
             * `crisis` - Crisis
             * `emergency` - Emergency
         status:
-          type: string
+          allOf:
+          - $ref: '#/components/schemas/StatusAcfEnum'
           readOnly: true
         reasonForReferral:
           type: string
@@ -15765,8 +15809,7 @@ components:
         reasonForReferral:
           type: string
         status:
-          type: string
-          maxLength: 255
+          $ref: '#/components/schemas/StatusAcfEnum'
         isReferralAndClientCompleted:
           type: boolean
           description: Whether referral and client processes are completed
@@ -15892,7 +15935,8 @@ components:
             * `crisis` - Crisis
             * `emergency` - Emergency
         status:
-          type: string
+          allOf:
+          - $ref: '#/components/schemas/StatusAcfEnum'
           readOnly: true
         reasonForReferral:
           type: string
@@ -15971,7 +16015,8 @@ components:
           type: string
           readOnly: true
         status:
-          type: string
+          allOf:
+          - $ref: '#/components/schemas/Status1eaEnum'
           readOnly: true
         statusDisplay:
           type: string
@@ -16063,7 +16108,8 @@ components:
           type: string
           readOnly: true
         status:
-          type: string
+          allOf:
+          - $ref: '#/components/schemas/Status1eaEnum'
           readOnly: true
         createdAt:
           type: string
@@ -16389,7 +16435,8 @@ components:
           nullable: true
           description: Expected or actual end date of the service
         status:
-          type: string
+          allOf:
+          - $ref: '#/components/schemas/ServiceStatusEnum'
           readOnly: true
         createdAt:
           type: string
@@ -16443,7 +16490,8 @@ components:
           readOnly: true
           description: End date of the contract for this service
         status:
-          type: string
+          allOf:
+          - $ref: '#/components/schemas/ServiceContractListStatusEnum'
           readOnly: true
         statusChangedDate:
           type: string
@@ -16460,6 +16508,16 @@ components:
       - startDate
       - status
       - statusChangedDate
+    ServiceContractListStatusEnum:
+      enum:
+      - active
+      - archived
+      - inactive
+      type: string
+      description: |-
+        * `active` - Active
+        * `archived` - Archived
+        * `inactive` - Inactive
     ServiceDetails:
       type: object
       description: Simplified serializer for Service details.
@@ -16537,7 +16595,8 @@ components:
           default: true
           description: Whether the assigned staff is primary responsible
         status:
-          type: string
+          allOf:
+          - $ref: '#/components/schemas/StatusE21Enum'
           readOnly: true
         riskLevel:
           $ref: '#/components/schemas/RiskLevelEnum'
@@ -16572,7 +16631,8 @@ components:
           type: string
           readOnly: true
         status:
-          type: string
+          allOf:
+          - $ref: '#/components/schemas/StatusE21Enum'
           readOnly: true
         statusDisplay:
           type: string
@@ -16650,8 +16710,7 @@ components:
           type: string
           maxLength: 50
         status:
-          type: string
-          maxLength: 255
+          $ref: '#/components/schemas/StatusE21Enum'
         statusDisplay:
           type: string
           readOnly: true
@@ -16780,7 +16839,7 @@ components:
       properties:
         status:
           allOf:
-          - $ref: '#/components/schemas/ServiceEpisodeStatusUpdateStatusEnum'
+          - $ref: '#/components/schemas/StatusE21Enum'
           description: |-
             New status for the service episode
 
@@ -16800,20 +16859,6 @@ components:
             is 'Other')
       required:
       - status
-    ServiceEpisodeStatusUpdateStatusEnum:
-      enum:
-      - awaiting_commencement
-      - active
-      - on_hold
-      - completed
-      - closed
-      type: string
-      description: |-
-        * `awaiting_commencement` - Awaiting Commencement
-        * `active` - Active
-        * `on_hold` - On Hold
-        * `completed` - Completed
-        * `closed` - Closed
     ServiceEpisodeUpdate:
       type: object
       description: |-
@@ -16929,6 +16974,20 @@ components:
       - staffEmail
       - staffName
       - updatedAt
+    ServiceStatusEnum:
+      enum:
+      - pending
+      - active
+      - completed
+      - terminated
+      - suspended
+      type: string
+      description: |-
+        * `pending` - Pending Approval
+        * `active` - Active
+        * `completed` - Completed
+        * `terminated` - Terminated
+        * `suspended` - Suspended
     ServiceUserList:
       type: object
       description: |-
@@ -17080,6 +17139,18 @@ components:
       - id
       - name
       - updatedAt
+    Status1eaEnum:
+      enum:
+      - pending
+      - expired
+      - accepted
+      - rejected
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `expired` - Expired
+        * `accepted` - Accepted
+        * `rejected` - Rejected
     Status76cEnum:
       enum:
       - draft
@@ -17090,6 +17161,50 @@ components:
         * `draft` - Draft
         * `saved` - Saved
         * `archived` - Archived
+    StatusAcfEnum:
+      enum:
+      - draft
+      - pending_consent
+      - pending_associated_contact
+      - pending_assessment
+      - pending_cultural_soco
+      - pending_review
+      - pending_service_dispatch
+      - pending_service_review
+      - accepted_pending_allocation
+      - allocated_awaiting_service
+      - service_in_progress
+      - closed
+      - completed
+      type: string
+      description: |-
+        * `draft` - Draft
+        * `pending_consent` - Pending Consent
+        * `pending_associated_contact` - Pending Associated Contact
+        * `pending_assessment` - Pending Assessment
+        * `pending_cultural_soco` - Pending Cultural Soco
+        * `pending_review` - Pending Review
+        * `pending_service_dispatch` - Pending Service Dispatch
+        * `pending_service_review` - Pending Service Review
+        * `accepted_pending_allocation` - Accepted Pending Allocation
+        * `allocated_awaiting_service` - Allocated Awaiting Service
+        * `service_in_progress` - Service In Progress
+        * `closed` - Closed
+        * `completed` - Completed
+    StatusE21Enum:
+      enum:
+      - awaiting_commencement
+      - active
+      - on_hold
+      - completed
+      - closed
+      type: string
+      description: |-
+        * `awaiting_commencement` - Awaiting Commencement
+        * `active` - Active
+        * `on_hold` - On Hold
+        * `completed` - Completed
+        * `closed` - Closed
     SubstanceUseAssessment:
       type: object
       description: Serializer for substance use assessment section.

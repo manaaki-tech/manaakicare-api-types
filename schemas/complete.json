@@ -1449,12 +1449,6 @@ paths:
         description: A page number within the paginated result set.
         schema:
           type: integer
-      - name: page_size
-        required: false
-        in: query
-        description: Number of results to return per page.
-        schema:
-          type: integer
       - in: query
         name: scope
         schema:
@@ -4341,6 +4335,9 @@ paths:
       description: |-
         API endpoint for managing languages.
         Provides CRUD operations for Language model.
+
+        Languages are ordered by sort_order (descending) then name (ascending).
+        Priority languages for NZ/Pacific region have higher sort_order values.
       parameters:
       - in: query
         name: is_active
@@ -4380,6 +4377,9 @@ paths:
       description: |-
         API endpoint for managing languages.
         Provides CRUD operations for Language model.
+
+        Languages are ordered by sort_order (descending) then name (ascending).
+        Priority languages for NZ/Pacific region have higher sort_order values.
       tags:
       - v1
       requestBody:
@@ -4409,6 +4409,9 @@ paths:
       description: |-
         API endpoint for managing languages.
         Provides CRUD operations for Language model.
+
+        Languages are ordered by sort_order (descending) then name (ascending).
+        Priority languages for NZ/Pacific region have higher sort_order values.
       parameters:
       - in: path
         name: id
@@ -4433,6 +4436,9 @@ paths:
       description: |-
         API endpoint for managing languages.
         Provides CRUD operations for Language model.
+
+        Languages are ordered by sort_order (descending) then name (ascending).
+        Priority languages for NZ/Pacific region have higher sort_order values.
       parameters:
       - in: path
         name: id
@@ -4469,6 +4475,9 @@ paths:
       description: |-
         API endpoint for managing languages.
         Provides CRUD operations for Language model.
+
+        Languages are ordered by sort_order (descending) then name (ascending).
+        Priority languages for NZ/Pacific region have higher sort_order values.
       parameters:
       - in: path
         name: id
@@ -4504,6 +4513,9 @@ paths:
       description: |-
         API endpoint for managing languages.
         Provides CRUD operations for Language model.
+
+        Languages are ordered by sort_order (descending) then name (ascending).
+        Priority languages for NZ/Pacific region have higher sort_order values.
       parameters:
       - in: path
         name: id
@@ -6138,6 +6150,38 @@ paths:
               schema:
                 $ref: '#/components/schemas/Iwi'
           description: ''
+  /api/v1/organisations/terminologies/{org_id}/:
+    get:
+      operationId: v1_organisations_terminologies_list
+      description: |-
+        Public API endpoint to retrieve active terminologies for a given organisation.
+        No authentication required.
+        GET /api/v1/organisations/terminologies/<org_id>/
+      parameters:
+      - in: path
+        name: org_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTerminologyPublicList'
+          description: ''
   /api/v1/referral/:
     get:
       operationId: v1_referral_list
@@ -6145,6 +6189,11 @@ paths:
         ViewSet for ReferralInfo instances.
         Provides CRUD operations and status update functionality.
       parameters:
+      - in: query
+        name: family_member
+        schema:
+          type: string
+          format: uuid
       - in: query
         name: from_date
         schema:
@@ -7409,19 +7458,25 @@ paths:
       - in: query
         name: status
         schema:
-          type: string
-          enum:
-          - active
-          - awaiting_commencement
-          - closed
-          - completed
-          - on_hold
+          type: array
+          items:
+            type: string
+            enum:
+            - active
+            - awaiting_commencement
+            - closed
+            - completed
+            - on_hold
         description: |-
+          Multiple values may be separated by commas.
+
           * `awaiting_commencement` - Awaiting Commencement
           * `active` - Active
           * `on_hold` - On Hold
           * `completed` - Completed
           * `closed` - Closed
+        explode: false
+        style: form
       tags:
       - v1
       security:
@@ -7940,10 +7995,12 @@ paths:
 
         Expected payload:
         {
-            "end_date": "2025-11-30",
-            "episode_closure_reason": "goals_achieved",
-            "closer_other_reason": "Optional, required if episode_closure_reason is 'other'",
-            "closure_notes": "Optional notes"
+            "end_date": "2025-11-30",                    // Required
+            "episode_closure_reason": "uuid",            // Required
+            "closer_other_reason": "string",             // Required only if episode_closure_reason is 'other'
+            "closure_notes": "string",                   // Optional
+            "is_follow_up_required": false,              // Optional, defaults to false
+            "follow_up_date": "2025-12-15"               // Required only if is_follow_up_required is true
         }
       parameters:
       - in: path
@@ -8975,6 +9032,13 @@ components:
           type: string
           format: date-time
           readOnly: true
+        riskLevel:
+          allOf:
+          - $ref: '#/components/schemas/RiskLevelEnum'
+          readOnly: true
+        riskNotes:
+          type: string
+          readOnly: true
       required:
       - attachmentsCount
       - createdAt
@@ -8991,6 +9055,8 @@ components:
       - outcome
       - outcomeDisplay
       - referenceNumber
+      - riskLevel
+      - riskNotes
       - startTime
       - status
       - statusDisplay
@@ -9639,6 +9705,11 @@ components:
         name:
           type: string
           readOnly: true
+        familyMemberId:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
         serviceId:
           type: string
           format: uuid
@@ -9715,6 +9786,7 @@ components:
       - activityDate
       - createdAt
       - date
+      - familyMemberId
       - followupDate
       - id
       - isFollowup
@@ -10470,6 +10542,9 @@ components:
 
             * `service_user` - service_user
             * `serviceuser` - serviceuser
+            * `family_member` - family_member
+            * `familymember` - familymember
+            * `person` - person
             * `staff` - staff
             * `user` - user
             * `organisation` - organisation
@@ -10655,6 +10730,9 @@ components:
       enum:
       - service_user
       - serviceuser
+      - family_member
+      - familymember
+      - person
       - staff
       - user
       - organisation
@@ -10668,6 +10746,9 @@ components:
       description: |-
         * `service_user` - service_user
         * `serviceuser` - serviceuser
+        * `family_member` - family_member
+        * `familymember` - familymember
+        * `person` - person
         * `staff` - staff
         * `user` - user
         * `organisation` - organisation
@@ -12852,6 +12933,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SupportedContact'
+    PaginatedTerminologyPublicList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TerminologyPublic'
     PaginatedUserListList:
       type: object
       required:
@@ -14656,6 +14760,14 @@ components:
         currentWorkflowStage:
           type: string
           readOnly: true
+        referralServiceRequests:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          description: Get only active referral service requests (pending or accepted)
+            for this referral.
+          readOnly: true
     PatchedReferralServiceRequestDetails:
       type: object
       description: |-
@@ -15390,11 +15502,13 @@ components:
       - manager
       - supervisor
       - case_worker
+      - intake_officer
       type: string
       description: |-
         * `manager` - Manager
         * `supervisor` - Supervisor
         * `case_worker` - Case Worker
+        * `intake_officer` - Intake Officer
     PositionTypeEnum:
       enum:
       - contractor
@@ -15864,6 +15978,14 @@ components:
         currentWorkflowStage:
           type: string
           readOnly: true
+        referralServiceRequests:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          description: Get only active referral service requests (pending or accepted)
+            for this referral.
+          readOnly: true
       required:
       - closedReason
       - consentDetail
@@ -15877,6 +15999,7 @@ components:
       - person
       - progress
       - referenceNumber
+      - referralServiceRequests
       - status
       - updatedAt
     ReferralInfoList:
@@ -15956,6 +16079,15 @@ components:
         currentWorkflowStage:
           type: string
           readOnly: true
+        referralServiceRequests:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          description: |-
+            Get only active referral service requests (pending or accepted) for this referral.
+            Returns an array of ReferralServiceRequestList objects.
+          readOnly: true
       required:
       - createdAt
       - currentWorkflowStage
@@ -15966,6 +16098,7 @@ components:
       - reasonForReferral
       - referenceNumber
       - referralDate
+      - referralServiceRequests
       - referralType
       - referrerSource
       - status
@@ -16490,8 +16623,7 @@ components:
           readOnly: true
           description: End date of the contract for this service
         status:
-          allOf:
-          - $ref: '#/components/schemas/ServiceContractListStatusEnum'
+          type: string
           readOnly: true
         statusChangedDate:
           type: string
@@ -16508,16 +16640,6 @@ components:
       - startDate
       - status
       - statusChangedDate
-    ServiceContractListStatusEnum:
-      enum:
-      - active
-      - archived
-      - inactive
-      type: string
-      description: |-
-        * `active` - Active
-        * `archived` - Archived
-        * `inactive` - Inactive
     ServiceDetails:
       type: object
       description: Simplified serializer for Service details.
@@ -16745,6 +16867,11 @@ components:
         familyName:
           type: string
           readOnly: true
+        familyMemberId:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
         referralReference:
           type: string
           readOnly: true
@@ -16764,6 +16891,7 @@ components:
       - assignedStaffList
       - createdAt
       - familyId
+      - familyMemberId
       - familyName
       - id
       - personId
@@ -16934,6 +17062,7 @@ components:
             * `manager` - Manager
             * `supervisor` - Supervisor
             * `case_worker` - Case Worker
+            * `intake_officer` - Intake Officer
         positionDisplay:
           type: string
           readOnly: true
@@ -17442,6 +17571,22 @@ components:
         * `social_media` - Social Media
         * `video` - Video
         * `sms_text` - SMS/Text
+    TerminologyPublic:
+      type: object
+      description: |-
+        Public serializer for Terminology model.
+        Returns only name and terminology_data for frontend consumption.
+      properties:
+        name:
+          type: string
+          readOnly: true
+        terminologyData:
+          readOnly: true
+          description: JSON containing terminology titles, descriptions, and other
+            display text for the frontend
+      required:
+      - name
+      - terminologyData
     TokenRefresh:
       type: object
       properties:
